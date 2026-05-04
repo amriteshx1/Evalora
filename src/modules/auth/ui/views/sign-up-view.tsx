@@ -60,12 +60,12 @@ export const SignUpView = () => {
                 name: data.name,
                 email: data.email,
                 password: data.password,
-                callbackURL: "/meetings",
+                callbackURL: "/interviews",
             },
             {
                 onSuccess: () => {
                     setPending(false);
-                    router.push("/meetings");
+                    router.push("/interviews");
                 },
                 onError: ({ error }) => {
                     setPending(false);
@@ -82,7 +82,7 @@ export const SignUpView = () => {
         authClient.signIn.social(
             {
                 provider: provider,
-                callbackURL: "/meetings",
+                callbackURL: "/interviews",
             },
             {
                 onSuccess: () => {
@@ -239,7 +239,7 @@ export const SignUpView = () => {
                     <div className="bg-radial from-sidebar-accent to-sidebar relative hidden md:flex flex-col gap-y-4 items-center justify-center">
                         <Image src="/logo.svg" alt="Image" width={82} height={82} className="lg:h-[82px] lg:w-[82px] h-[62px] w-[62px]" />
                         <p className="text-2xl font-semibold text-white">
-                            Wiora
+                            Evalora
                         </p>
                     </div>
                 </CardContent>

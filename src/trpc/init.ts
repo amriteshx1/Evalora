@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { agents, meetings } from '@/db/schema';
+import { interviewers, interviews } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { polarClient } from '@/lib/polar';
 import { MAX_FREE_AGENTS, MAX_FREE_MEETINGS } from '@/modules/premium/constants';
@@ -38,7 +38,7 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
 
   return next ({ ctx: {...ctx, auth: session}});
 });
-export const premiumProcedure = (entity: "meetings" | "agents") =>
+export const premiumProcedure = (entity: "meetings" | "interviewers") =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const customer = await polarClient.customers.getStateExternal({
       externalId: ctx.auth.user.id,
@@ -46,17 +46,17 @@ export const premiumProcedure = (entity: "meetings" | "agents") =>
 
     const [userMeetings] = await db 
       .select({
-        count: count(meetings.id),
+        count: count(interviews.id),
       })
-      .from(meetings)
-      .where(eq(meetings.userId, ctx.auth.user.id));
+      .from(interviews)
+      .where(eq(interviews.userId, ctx.auth.user.id));
 
     const [userAgents] = await db 
       .select({
-        count: count(agents.id),
+        count: count(interviewers.id),
       })
-      .from(agents)
-      .where(eq(agents.userId, ctx.auth.user.id));
+      .from(interviewers)
+      .where(eq(interviewers.userId, ctx.auth.user.id));
 
     const isPremium = customer.activeSubscriptions.length > 0;
     const isFreeAgentLimitReached = userAgents.count >= MAX_FREE_AGENTS;
@@ -65,7 +65,7 @@ export const premiumProcedure = (entity: "meetings" | "agents") =>
     const shouldThrowMeetingError = 
       entity === "meetings" && isFreeMeetingLimitReached && !isPremium;
     const shouldThrowAgentError = 
-      entity === "agents" && isFreeAgentLimitReached && !isPremium;
+      entity === "interviewers" && isFreeAgentLimitReached && !isPremium;
 
     if(shouldThrowMeetingError){
       throw new TRPCError ({
@@ -77,7 +77,7 @@ export const premiumProcedure = (entity: "meetings" | "agents") =>
     if(shouldThrowAgentError){
       throw new TRPCError ({
         code: "FORBIDDEN",
-        message: "You have reached the maximum number of free agents",
+        message: "You have reached the maximum number of free interviewers",
       });
     }
 

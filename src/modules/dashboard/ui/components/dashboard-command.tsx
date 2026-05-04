@@ -18,13 +18,13 @@ export const DashboardCommand = ({ open, setOpen }: Props) => {
 
     const trpc = useTRPC();
     const meetings = useQuery(
-        trpc.meetings.getMany.queryOptions({
+        trpc.interviews.getMany.queryOptions({
             search,
             pageSize: 100,
         })
     );
-    const agents = useQuery(
-        trpc.agents.getMany.queryOptions({
+    const interviewers = useQuery(
+        trpc.interviewers.getMany.queryOptions({
             search,
             pageSize: 100,
         })
@@ -33,49 +33,49 @@ export const DashboardCommand = ({ open, setOpen }: Props) => {
     return (
         <CommandResponsiveDialog shouldFilter={false} open={open} onOpenChange={setOpen}>
             <CommandInput 
-             placeholder="Find a meeting or agent..."
+             placeholder="Find a interview or interviewer..."
              value={search}
              onValueChange={(value) => setSearch(value)}
             />
             <CommandList>
-                <CommandGroup heading="Meetings">
+                <CommandGroup heading="Interviews">
                     <CommandEmpty>
                         <span className="text-muted-foreground text-sm">
                             No meetings found
                         </span>
                     </CommandEmpty>
-                    {meetings.data?.items.map((meeting) => (
+                    {meetings.data?.items.map((interview) => (
                         <CommandItem
                           onSelect={() => {
-                            router.push(`/meetings/${meeting.id}`);
+                            router.push(`/meetings/${interview.id}`);
                             setOpen(false)
                           }}
-                          key={meeting.id}
+                          key={interview.id}
                         >
-                            {meeting.name}
+                            {interview.name}
                         </CommandItem>
                     ))}
                 </CommandGroup>
-                <CommandGroup heading="Agents">
+                <CommandGroup heading="Interviewers">
                     <CommandEmpty>
                         <span className="text-muted-foreground text-sm">
-                            No agents found
+                            No interviewers found
                         </span>
                     </CommandEmpty>
-                    {agents.data?.items.map((agent) => (
+                    {interviewers.data?.items.map((interviewer) => (
                         <CommandItem
                           onSelect={() => {
-                            router.push(`/agents/${agent.id}`);
+                            router.push(`/interviewers/${interviewer.id}`);
                             setOpen(false)
                           }}
-                          key={agent.id}
+                          key={interviewer.id}
                         >
                             <GeneratedAvatar 
-                              seed={agent.name}
+                              seed={interviewer.name}
                               variant="botttsNeutral"
                               className="size-5"
                             />
-                            {agent.name}
+                            {interviewer.name}
                         </CommandItem>
                     ))}
                 </CommandGroup>

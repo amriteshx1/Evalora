@@ -11,7 +11,7 @@ const Page = async () => {
   });
 
   if(!!session){
-    redirect("/meetings");
+    redirect("/interviews");
   }
 
   return <SignUpView />

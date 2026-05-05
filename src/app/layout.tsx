@@ -13,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Wiora",
-  description: "AI-powered meeting platform where custom agents join live calls and provide post call insights.",
+  title: "Evalora",
+  description: "AI-powered smart interview platform for real-time technical interviews and structured candidate evaluation.",
 };
 
 export default function RootLayout({

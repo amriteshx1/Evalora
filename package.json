@@ -1,5 +1,5 @@
 {
-  "name": "wiora",
+  "name": "evalora",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "@dicebear/collection": "^9.2.2",
     "@dicebear/core": "^9.2.2",
     "@hookform/resolvers": "^5.2.1",
-    "@inngest/agent-kit": "^0.8.0",
+    "@inngest/interviewer-kit": "^0.8.0",
     "@neondatabase/serverless": "^1.0.0",
     "@polar-sh/better-auth": "^1.0.1",
     "@polar-sh/sdk": "^0.32.16",

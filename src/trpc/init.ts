@@ -1,8 +1,8 @@
 import { db } from '@/db';
-import { interviewers, interviews } from '@/db/schema';
+import { interviewers, interviews, user } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { polarClient } from '@/lib/polar';
-import { MAX_FREE_AGENTS, MAX_FREE_MEETINGS } from '@/modules/premium/constants';
+import { MAX_FREE_INTERVIEWERS, MAX_FREE_INTERVIEWS } from '@/modules/premium/constants';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { count, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
@@ -36,15 +36,26 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
   }
 
-  return next ({ ctx: {...ctx, auth: session}});
+  const [currentUser] = await db
+    .select({ role: user.role })
+    .from(user)
+    .where(eq(user.id, session.user.id));
+
+  return next ({
+    ctx: {
+      ...ctx,
+      auth: session,
+      authRole: currentUser?.role ?? "recruiter",
+    },
+  });
 });
-export const premiumProcedure = (entity: "meetings" | "interviewers") =>
+export const premiumProcedure = (entity: "interviews" | "interviewers") =>
   protectedProcedure.use(async ({ ctx, next }) => {
     const customer = await polarClient.customers.getStateExternal({
       externalId: ctx.auth.user.id,
     });
 
-    const [userMeetings] = await db 
+    const [userInterviews] = await db
       .select({
         count: count(interviews.id),
       })
@@ -59,22 +70,22 @@ export const premiumProcedure = (entity: "meetings" | "interviewers") =>
       .where(eq(interviewers.userId, ctx.auth.user.id));
 
     const isPremium = customer.activeSubscriptions.length > 0;
-    const isFreeAgentLimitReached = userAgents.count >= MAX_FREE_AGENTS;
-    const isFreeMeetingLimitReached = userMeetings.count >= MAX_FREE_MEETINGS;
+    const isFreeInterviewerLimitReached = userAgents.count >= MAX_FREE_INTERVIEWERS;
+    const isFreeInterviewLimitReached = userInterviews.count >= MAX_FREE_INTERVIEWS;
 
-    const shouldThrowMeetingError = 
-      entity === "meetings" && isFreeMeetingLimitReached && !isPremium;
-    const shouldThrowAgentError = 
-      entity === "interviewers" && isFreeAgentLimitReached && !isPremium;
+    const shouldThrowInterviewError =
+      entity === "interviews" && isFreeInterviewLimitReached && !isPremium;
+    const shouldThrowInterviewerError =
+      entity === "interviewers" && isFreeInterviewerLimitReached && !isPremium;
 
-    if(shouldThrowMeetingError){
+    if(shouldThrowInterviewError){
       throw new TRPCError ({
         code: "FORBIDDEN",
-        message: "You have reached the maximum number of free meetings",
+        message: "You have reached the maximum number of free interviews",
       });
     }
 
-    if(shouldThrowAgentError){
+    if(shouldThrowInterviewerError){
       throw new TRPCError ({
         code: "FORBIDDEN",
         message: "You have reached the maximum number of free interviewers",
